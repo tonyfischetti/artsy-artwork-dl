@@ -21,23 +21,23 @@ completion.
 __author__ = 'Tony Fischetti'
 __version__ = '0.2'
 
+import os
+import re
 import sys
+
+import html2text as h2t
 import lxml.html
 from lxml.cssselect import CSSSelector
 import requests
-import html2text as h2t
-import re
 import wget
-import os
-
 
 
 ARTIST_CSS = CSSSelector(".entity-link")
 TITLE_CSS = CSSSelector(".artwork-metadata__title em")
 LINK_CSS = CSSSelector(".js-artwork-images__images__image__display__img")
 
-ARTIST_REGEX = re.compile('\[(.+?)\]', re.UNICODE) 
-TITLE_REGEX = re.compile('_(.+?)_, (\d+)', re.UNICODE) 
+ARTIST_REGEX = re.compile('\[(.+?)\]', re.UNICODE)
+TITLE_REGEX = re.compile('_(.+?)_, (\d+)', re.UNICODE)
 LINK_REGEX = re.compile('img data-src="(.+?)"', re.UNICODE)
 SEP_DIRS = re.compile("^(.+)/(.+?)$", re.UNICODE)
 
@@ -133,8 +133,8 @@ def rename_downloaded_artwork_image(old_filename, FN_TEMPLATE, artist,
     return True
 
 
-
 def main():
+    """doesn't do anything by itself that can fail"""
     THE_URL, FN_TEMPLATE = get_command_line_arguments()
 
     tree = parse_webpage(download_webpage(THE_URL))
@@ -150,8 +150,6 @@ def main():
     return True
 
 
-
 if __name__ == '__main__':
     STATUS = main()
     sys.exit(STATUS)
-
