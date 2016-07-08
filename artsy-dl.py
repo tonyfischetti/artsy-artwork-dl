@@ -11,11 +11,15 @@
 
 
 """
-this script is brittle
+Downloads artwork from artsy.net (from a URL given as a
+CLI argument) and renames the downloaded file to follow
+a filename template (given as a CLI arg) based on the
+artist's name, the title of the piece, and the date of
+completion.
 """
 
 __author__ = 'Tony Fischetti'
-__version__ = '0.1'
+__version__ = '0.2'
 
 import sys
 import lxml.html
@@ -28,65 +32,70 @@ import os
 
 
 
-
-THE_URL = sys.argv[1]
-FN_TEMPLATE = sys.argv[2]
-
-
 ARTIST_CSS = CSSSelector(".entity-link")
 TITLE_CSS = CSSSelector(".artwork-metadata__title em")
 LINK_CSS = CSSSelector(".js-artwork-images__images__image__display__img")
 
 ARTIST_REGEX = re.compile('\[(.+?)\]', re.UNICODE) 
 TITLE_REGEX = re.compile('_(.+?)_, (\d+)', re.UNICODE) 
-LINK_REGEX = re.compile('img data-src="(.+?)"')
+LINK_REGEX = re.compile('img data-src="(.+?)"', re.UNICODE)
+SEP_DIRS = re.compile("^(.+)/(.+?)$", re.UNICODE)
 
 
-
+#--------------------------------------------------#
 def cop_out(f):
     def inner(*args, **kargs):
         try:
             return f(*args, **kargs)
         except Exception as e:
-            print("The function <{}> failed".format(f.__name__))
+            print("\nThe function <{}> failed\n".format(f.__name__))
             sys.exit(1)
     return inner
+#--------------------------------------------------#
 
 
 @cop_out
-def get_text_from_element(element):
+def get_command_line_arguments():
+    return sys.argv[1], sys.argv[2]
+
+
+@cop_out
+def download_webpage(url):
+    return requests.get(url)
+
+
+@cop_out
+def parse_webpage(requests_object):
+    return lxml.html.fromstring(requests_object.text)
+
+
+@cop_out
+def extract_text_from_element(element):
     return h2t.html2text(lxml.html.tostring(element).decode("utf-8")).rstrip()
 
 
 @cop_out
-def get_tree(url):
-    r = requests.get(url)
-    return lxml.html.fromstring(r.text)
+def extract_artist_name_from_webpage(tree):
+    artist_text = extract_text_from_element(ARTIST_CSS(tree)[0])
+    return ARTIST_REGEX.search(artist_text).group(1)
 
 
 @cop_out
-def get_artist(tree):
-    artist_text = get_text_from_element(ARTIST_CSS(tree)[0])
-    final_artist = ARTIST_REGEX.search(artist_text).group(1)
-    return final_artist
-
-
-@cop_out
-def get_title_and_date(tree):
-    title_text = get_text_from_element(TITLE_CSS(tree)[0])
+def extract_title_and_date_from_webpage(tree):
+    title_text = extract_text_from_element(TITLE_CSS(tree)[0])
     tmp = TITLE_REGEX.search(title_text)
     return tmp.group(1), tmp.group(2)
 
 
 @cop_out
-def get_link(tree):
+def extract_artwork_image_link_from_webpage(tree):
     link_text = lxml.html.tostring(LINK_CSS(tree)[0]).decode("utf-8")
-    final_link = LINK_REGEX.search(link_text).group(1)
-    return final_link
+    return LINK_REGEX.search(link_text).group(1)
 
 
 @cop_out
-def get_new_filename(artist, title, date):
+def construct_new_filename_from_template_given(FN_TEMPLATE, artist,
+                                               title, date):
     template = FN_TEMPLATE
     if "%a" in FN_TEMPLATE:
         template = template.replace("%a", artist)
@@ -98,31 +107,47 @@ def get_new_filename(artist, title, date):
 
 
 @cop_out
-def download_image(link):
+def download_artwork_image(link):
     old_filename = wget.download(link)
     return old_filename
 
 
 @cop_out
-def rename_downloaded_image(old_filename, artist, title, date):
+def create_subdirectories_to_place_artwork_image(path):
+    os.makedirs(path, exist_ok=True)
+    return True
+
+
+@cop_out
+def rename_downloaded_artwork_image(old_filename, FN_TEMPLATE, artist,
+                                    title, date):
     tmp, extension = os.path.splitext(old_filename)
-    new_filename = get_new_filename(artist, title, date)
+    new_filename = construct_new_filename_from_template_given(FN_TEMPLATE,
+                                                              artist,
+                                                              title,
+                                                              date)
+    has_path = SEP_DIRS.search(new_filename)
+    if has_path:
+        create_subdirectories_to_place_artwork_image(has_path.group(1))
     os.rename(old_filename, "{}{}".format(new_filename, extension))
     return True
 
 
 
 def main():
-    tree = get_tree(THE_URL)
+    THE_URL, FN_TEMPLATE = get_command_line_arguments()
 
-    artist = get_artist(tree)
-    title, date = get_title_and_date(tree)
-    link = get_link(tree)
+    tree = parse_webpage(download_webpage(THE_URL))
 
-    old_filename = download_image(link)
-    rename_downloaded_image(old_filename, artist, title, date)
+    artist = extract_artist_name_from_webpage(tree)
+    title, date = extract_title_and_date_from_webpage(tree)
+    link = extract_artwork_image_link_from_webpage(tree)
 
+    old_filename = download_artwork_image(link)
+    rename_downloaded_artwork_image(old_filename, FN_TEMPLATE,
+                                    artist, title, date)
 
+    return True
 
 
 
