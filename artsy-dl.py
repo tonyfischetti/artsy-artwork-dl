@@ -47,10 +47,9 @@ def cop_out(f):
     def inner(*args, **kargs):
         try:
             return f(*args, **kargs)
-        except Exception as e:
+        except:
             message = f.__name__.replace("_", " ")
-            print("\nFailed to {}\n".format(message))
-            sys.exit(1)
+            sys.exit("\nFailed to {}\n".format(message))
     return inner
 #--------------------------------------------------#
 
