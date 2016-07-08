@@ -34,6 +34,28 @@ we can use the following command...
 python artsy-dl.py "https://www.artsy.net/artwork/marcel-duchamp-fountain-1" "%a - %t - %d"
 ```
 
+This script also has support for placing the images in directories. For
+example, if we wanted to download an image of
+[this piece](https://www.artsy.net/artwork/kay-sage-white-silence), and
+place it in a directory called `Kay Sage paintings` (even if the directory
+doesn't exist yet) and name it `White Silence (1941)`, we can do...
+
+```
+python artsy-dl.py "https://www.artsy.net/artwork/kay-sage-white-silence" "%a paintings/%t (%d)"
+```
+
+You can nest directories as well; let's say we wanted to download a bunch of
+images of [James Turrell's](https://www.artsy.net/artist/james-turrell) work
+and we wanted to organize it by year...
+
+```
+python artsy-dl.py "https://www.artsy.net/artwork/james-turrell-prado-white" "%a/%d/%t"
+python artsy-dl.py "http://www.artsy.net/artwork/james-turrell-raethro-green-1" "%a/%d/%t"
+python artsy-dl.py "https://www.artsy.net/artwork/james-turrell-sloan-red-1" "%a/%d/%t"
+```
+
+This created a directory called `James Turrell` and two subdirectories,
+`1968` and `1967` because two of the pieces were done in the same year.
 
 
 
