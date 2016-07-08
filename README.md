@@ -1,5 +1,5 @@
 artsy-artwork-dl
------------------
+=================
 
 This is a script that takes the URL of an artwork on artsy.net,
 downloads the image, and then names the file consistently
@@ -12,7 +12,7 @@ artist's name, the title of the piece, and the date of
 completion.
 
 usage
-=====
+-----
 The two command line arguments are the URL to the artwork on artsy
 and the string that describes what to name the file of the downloaded
 image.
@@ -25,7 +25,7 @@ allowed:
 - `%d`   which will be replaced with the date of the piece
 
 For example, if we wanted to download an image of the
-[Fountain](https://en.wikipedia.org/wiki/Fountain_(Duchamp\)),
+[Fountain](https://en.wikipedia.org/wiki/Fountain_(Duchamp)),
 and have the file automatically named:
 `Marcel Duchamp - Fountain - 1917.jpg`,
 we can use the following command...
@@ -38,7 +38,7 @@ python artsy-dl.py "https://www.artsy.net/artwork/marcel-duchamp-fountain-1" "%a
 
 
 requirements
-============
+------------
 - python (tested with 2.7 and 3.4)
 
 And the following python modules
