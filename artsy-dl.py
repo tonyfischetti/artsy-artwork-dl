@@ -86,7 +86,7 @@ def get_link(tree):
 
 
 @cop_out
-def get_good_filename(artist, title, date):
+def get_new_filename(artist, title, date):
     template = FN_TEMPLATE
     if "%a" in FN_TEMPLATE:
         template = template.replace("%a", artist)
@@ -97,6 +97,20 @@ def get_good_filename(artist, title, date):
     return template
 
 
+@cop_out
+def download_image(link):
+    old_filename = wget.download(link)
+    return old_filename
+
+
+@cop_out
+def rename_downloaded_image(old_filename, artist, title, date):
+    tmp, extension = os.path.splitext(old_filename)
+    new_filename = get_new_filename(artist, title, date)
+    os.rename(old_filename, "{}{}".format(new_filename, extension))
+    return True
+
+
 
 def main():
     tree = get_tree(THE_URL)
@@ -105,10 +119,9 @@ def main():
     title, date = get_title_and_date(tree)
     link = get_link(tree)
 
-    old_filename = wget.download(link)
-    tmp, extension = os.path.splitext(old_filename)
-    good_filename = get_good_filename(artist, title, date)
-    os.rename(old_filename, "{}{}".format(good_filename, extension))
+    old_filename = download_image(link)
+    rename_downloaded_image(old_filename, artist, title, date)
+
 
 
 
