@@ -48,7 +48,8 @@ def cop_out(f):
         try:
             return f(*args, **kargs)
         except Exception as e:
-            print("\nThe function <{}> failed\n".format(f.__name__))
+            message = f.__name__.replace("_", " ")
+            print("\nFailed to {}\n".format(message))
             sys.exit(1)
     return inner
 #--------------------------------------------------#
@@ -61,7 +62,10 @@ def get_command_line_arguments():
 
 @cop_out
 def download_webpage(url):
-    return requests.get(url)
+    r = requests.get(url)
+    if r.status_code != 200:
+        raise Exception
+    return r
 
 
 @cop_out
