@@ -1,11 +1,8 @@
 artsy-artwork-dl
 =================
 
-This is a script that takes the URL of an artwork on artsy.net,
-downloads the image, and then names the file consistently
-using info about the artwork
-
-This is a script that takes the URL of an art piece from artsy.net,
+This is a script that takes the URL of an art piece from
+[artsy.net](http://www.artsy.net),
 downloads the image of the artwork and renames the downloaded file
 to follow a filename template (given as a CLI arg) based on the
 artist's name, the title of the piece, and the date of
